@@ -1,0 +1,26 @@
+/* Short, direct-to-consumer funnel shared by the portfolio templates. */
+.studio,.testimonial,.story,.promise,.review,.process,.steps,.work,.marquee,.scroll-note{display:none!important}
+.direction-bar,.demo-bar,.theme-picker,.preview-bar{position:relative!important;top:auto!important;min-height:52px!important;height:auto!important}
+header,.site-header{height:72px!important;min-height:72px!important}
+header nav,.site-header nav{display:none!important}
+.hero{min-height:520px!important;padding-top:34px!important;padding-bottom:38px!important}
+.hero-copy{min-height:0!important;padding-top:34px!important;padding-bottom:34px!important}
+.hero h1,.site .hero h1{font-size:clamp(48px,7vw,92px)!important;margin-top:18px!important;margin-bottom:22px!important}
+.hero-image,.hero-media,.art-card,.visual{min-height:400px!important;max-height:500px!important}
+.hero-actions{margin-top:24px!important;margin-bottom:20px!important}
+.open-note,.kicker{margin-top:24px!important;margin-bottom:22px!important}
+.trust-strip>span,.stats>div,.proof-strip span,.proof{padding-top:16px!important;padding-bottom:16px!important}
+.services,.services-section,.menu{padding:56px 5vw!important;gap:5vw!important}
+.section-heading h2,.section-intro h2,.menu-lead h2{font-size:clamp(38px,5vw,62px)!important;margin-top:14px!important;margin-bottom:20px!important}
+.service-list article,.menu-list article{padding-top:18px!important;padding-bottom:18px!important}
+.cards{gap:12px!important}.cards article{padding:24px!important;min-height:0!important}
+.booking,.contact,.estimate,.reserve{padding:58px 5vw!important;min-height:0!important}
+.booking h2,.contact h2,.estimate h2,.reserve h2{font-size:clamp(48px,7vw,88px)!important;margin:14px 0 28px!important}
+footer{min-height:80px!important;padding-top:28px!important;padding-bottom:28px!important}
+
+/* Product configurator: keep the buying controls, remove the long case-study scroll. */
+.maker{padding:38px 3vw 54px!important}.maker-copy{margin-bottom:28px!important}.maker h1{font-size:clamp(54px,7vw,92px)!important;margin-bottom:18px!important}.configurator{margin-top:28px!important}.product-stage{min-height:510px!important}.controls{padding:22px!important}.controls fieldset{padding:14px 0!important}.product-options button{min-height:48px!important}.quote-button{height:60px!important}
+
+@media(max-width:800px){
+  .hero{min-height:0!important;padding:34px 20px!important}.hero-copy{padding:16px 0 28px!important}.hero-image,.hero-media,.art-card,.visual{height:410px!important;min-height:410px!important}.services,.services-section,.menu{padding:48px 20px!important}.booking,.contact,.estimate,.reserve{padding:52px 20px!important}.product-stage{min-height:390px!important}.maker{padding:34px 20px 46px!important}
+}
