@@ -31,6 +31,7 @@ export default function Showcase() {
   const selected = hatShapes[slide];
   const crownHeight = selected.crown + (shape - 50) * 0.15;
   const brimWidth = selected.brim + (shape - 50) * 0.18;
+  const feltFilter = felt.name === "Bone" ? "sepia(.72) saturate(.45) brightness(1.7)" : felt.name === "Tobacco" ? "sepia(.8) saturate(1.45) brightness(.95)" : felt.name === "Sage" ? "sepia(.35) saturate(.5) hue-rotate(42deg) brightness(1.05)" : "none";
 
   return <main>
     <section className="hero" id="top">
@@ -63,7 +64,7 @@ export default function Showcase() {
       </div>
       <div className="hat-stage" style={{"--felt": felt.value, "--crown": `${crownHeight}%`, "--brim": `${brimWidth}%`} as React.CSSProperties}>
         <div className="orbit-label"><span>Drag to shape</span><span>Live atelier preview</span></div>
-        <div className="hat" aria-label={`${felt.name} ${selected.name} preview`}><div className="hat-crown"><span>{initials}</span></div><div className="hat-band" data-band={band}/><div className="hat-brim"/></div>
+        <div className="hat-render-wrap" aria-label={`${felt.name} ${selected.name} preview`} style={{transform:`scaleX(${.94 + brimWidth / 1500}) scaleY(${.94 + crownHeight / 1500}) rotate(${(shape - 50) * .025}deg)`}}><img className="hat-render" src="./range-made-hat-v2.png" alt="Custom black felt cowboy hat with a silver buckle" style={{filter:feltFilter}}/><span className="hat-monogram">{initials}</span></div>
         <div className="shaper"><span>Soft</span><input aria-label="Adjust hat shape" type="range" min="0" max="100" value={shape} onChange={(event) => setShape(Number(event.target.value))}/><span>Sharp</span></div>
       </div>
       <div className="lab-controls">
