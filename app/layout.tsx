@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Patch / Object — Custom Goods, Made Thoughtfully",
-  description: "Build custom apparel, bags, hats, and everyday goods with a live product preview and transparent pricing.",
+  title: "Range / Made — Bespoke Hats & Custom Clothing",
+  description: "Shape a one-of-one western hat and commission custom clothing, made by hand in Phoenix, Arizona.",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",

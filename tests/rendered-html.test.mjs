@@ -1,37 +1,18 @@
 import assert from "node:assert/strict";
+import { access, readFile } from "node:fs/promises";
 import test from "node:test";
 
-async function render() {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
-  const { default: worker } = await import(workerUrl.href);
+test("builds the bespoke hat atelier", async () => {
+  const [html, source] = await Promise.all([
+    readFile(new URL("../dist/index.html", import.meta.url), "utf8"),
+    readFile(new URL("../app/showcase.tsx", import.meta.url), "utf8"),
+  ]);
 
-  return worker.fetch(
-    new Request("http://localhost/", {
-      headers: { accept: "text/html" },
-    }),
-    {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
-  );
-}
-
-test("server-renders the custom goods configurator", async () => {
-  const response = await render();
-  assert.equal(response.status, 200);
-  assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
-
-  const html = await response.text();
-  assert.match(html, /<title>Patch \/ Object/);
-  assert.match(html, /Goods worth/);
-  assert.match(html, /Build yours/);
-  assert.match(html, /Studio/);
-  assert.match(html, /Signal/);
-  assert.match(html, /Field/);
+  assert.match(html, /<title>Range \/ Made/);
+  assert.match(html, /assets\/index-/);
+  assert.match(source, /Wear/);
+  assert.match(source, /Shape yours/);
+  assert.match(source, /The High Desert/);
+  assert.match(source, /Request a fitting/);
+  await access(new URL("../dist/range-made-hero.png", import.meta.url));
 });

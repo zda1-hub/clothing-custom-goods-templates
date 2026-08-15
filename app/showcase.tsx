@@ -1,62 +1,89 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
-const directions = [
-  { id: "studio", number: "01", name: "Studio", note: "Clean + editorial" },
-  { id: "signal", number: "02", name: "Signal", note: "Bold + energetic" },
-  { id: "field", number: "03", name: "Field", note: "Warm + crafted" },
+const hatShapes = [
+  { name: "The High Desert", note: "Tall crown · wide brim", crown: 42, brim: 96, price: 340 },
+  { name: "The Drifter", note: "Low crown · soft roll", crown: 33, brim: 84, price: 295 },
+  { name: "The Cattleman", note: "Classic crease · firm edge", crown: 38, brim: 90, price: 320 },
 ] as const;
-const products = [
-  { id: "tee", label: "Heavy tee", price: 28, glyph: "T" },
-  { id: "tote", label: "Canvas tote", price: 24, glyph: "▱" },
-  { id: "cap", label: "Five-panel cap", price: 32, glyph: "⌒" },
-  { id: "goods", label: "Custom goods", price: 18, glyph: "✦" },
+
+const feltColors = [
+  { name: "Bone", value: "#d9cdb5" },
+  { name: "Tobacco", value: "#8a4f2c" },
+  { name: "Sage", value: "#69705d" },
+  { name: "Black", value: "#171513" },
 ] as const;
-const colors = [
-  { name: "Natural", value: "#e9e1d1" }, { name: "Ink", value: "#24221f" },
-  { name: "Persimmon", value: "#ed6542" }, { name: "Moss", value: "#66705a" },
-] as const;
-type Direction = (typeof directions)[number]["id"];
-type Product = (typeof products)[number];
 
 export default function Showcase() {
-  const [direction, setDirection] = useState<Direction>("studio");
-  const [product, setProduct] = useState<Product>(products[0]);
-  const [color, setColor] = useState(colors[0]);
-  const [placement, setPlacement] = useState("Center");
-  const [mark, setMark] = useState("MAKE\nSOMETHING");
-  const [quantity, setQuantity] = useState(24);
-  const [added, setAdded] = useState(false);
-  const unitPrice = useMemo(() => Math.max(12, product.price - (quantity >= 100 ? 6 : quantity >= 50 ? 4 : quantity >= 24 ? 2 : 0)), [product, quantity]);
+  const [slide, setSlide] = useState(0);
+  const [shape, setShape] = useState(58);
+  const [felt, setFelt] = useState(feltColors[0]);
+  const [band, setBand] = useState("Leather");
+  const [initials, setInitials] = useState("RM");
+  const [requested, setRequested] = useState(false);
 
-  return <main className={`site direction-${direction}`}>
-    <div className="announcement"><span>Small-run custom goods, made thoughtfully</span><span>Free setup on 24+ pieces</span></div>
-    <header><a className="brand" href="#top"><span className="brand-mark">P/O</span><span>Patch / Object</span></a><nav aria-label="Main navigation"><a href="#make">Make</a><a href="#process">How it works</a><a href="#work">Past work</a></nav><a className="bag-link" href="#quote">Quote list <span>{added ? "1" : "0"}</span></a></header>
-    <section className="direction-bar" aria-label="Select a design direction"><p>View this template in</p><div>{directions.map((item) => <button key={item.id} onClick={() => setDirection(item.id)} className={direction === item.id ? "active" : ""}><b>{item.number}</b><span>{item.name}<small>{item.note}</small></span></button>)}</div></section>
+  useEffect(() => {
+    const timer = window.setInterval(() => setSlide((current) => (current + 1) % hatShapes.length), 6500);
+    return () => window.clearInterval(timer);
+  }, []);
 
-    <section className="maker" id="top">
-      <div className="maker-copy"><p className="kicker">Your idea, made tangible.</p><h1>Goods worth<br/>holding onto.</h1><div><p className="lede">Design custom apparel and everyday objects without the usual back-and-forth. Start with a piece, make it yours, and see the numbers as you go.</p><div className="proof"><span>4.9 / 5 client rating</span><span>Made in Phoenix, AZ</span></div></div></div>
-      <div className="configurator" id="make">
-        <div className="product-stage" style={{ "--product-color": color.value } as React.CSSProperties}>
-          <div className={`product product-${product.id}`} aria-label={`${color.name} ${product.label} preview`}>
-            {product.id === "tee" && <i className="collar"/>}{product.id === "tote" && <i className="handles"/>}{product.id === "cap" && <i className="bill"/>}
-            <span className={`imprint placement-${placement.toLowerCase().replace(" ", "-")}`}>{mark.split("\n").map((line, i) => <span key={i}>{line}</span>)}</span>
-          </div><span className="stage-label">Live preview · Not to scale</span>
-        </div>
-        <div className="controls">
-          <div className="control-heading"><span>Build yours</span><strong>${unitPrice}<small> / piece</small></strong></div>
-          <fieldset><legend><b>01</b> Choose a base</legend><div className="product-options">{products.map((item) => <button key={item.id} className={product.id === item.id ? "selected" : ""} onClick={() => setProduct(item)}><i>{item.glyph}</i><span>{item.label}<small>from ${item.price}</small></span></button>)}</div></fieldset>
-          <fieldset><legend><b>02</b> Pick a color <em>{color.name}</em></legend><div className="swatches">{colors.map((item) => <button key={item.name} aria-label={item.name} aria-pressed={color.name === item.name} onClick={() => setColor(item)} style={{background:item.value}} />)}</div></fieldset>
-          <fieldset><legend><b>03</b> Add your mark</legend><div className="mark-row"><textarea aria-label="Text on product" maxLength={28} value={mark} onChange={(e) => setMark(e.target.value.toUpperCase())}/><select aria-label="Print placement" value={placement} onChange={(e) => setPlacement(e.target.value)}><option>Center</option><option>Left chest</option><option>Oversized</option></select></div></fieldset>
-          <fieldset><legend><b>04</b> Quantity</legend><div className="quantity-row"><button onClick={() => setQuantity(Math.max(12, quantity - 12))} aria-label="Decrease quantity">−</button><output>{quantity} pieces</output><button onClick={() => setQuantity(quantity + 12)} aria-label="Increase quantity">+</button><span>Save more at 50+</span></div></fieldset>
-          <div className="quote-total"><span>Estimated total<small>Shipping calculated with your final quote.</small></span><strong>${(unitPrice * quantity).toLocaleString()}</strong></div>
-          <button id="quote" className="quote-button" onClick={() => setAdded(true)}>{added ? "Added — we’ll make it real" : "Add to quote list"}<span>↗</span></button>
-        </div>
+  const selected = hatShapes[slide];
+  const crownHeight = selected.crown + (shape - 50) * 0.15;
+  const brimWidth = selected.brim + (shape - 50) * 0.18;
+
+  return <main>
+    <section className="hero" id="top">
+      <div className="hero-image" aria-hidden="true" />
+      <div className="grain" aria-hidden="true" />
+      <header>
+        <button className="menu" aria-label="Open menu"><span>Menu</span><i /><i /></button>
+        <a className="wordmark" href="#top">Range / Made</a>
+        <a className="commission" href="#atelier"><em>Start your</em> commission <span>↗</span></a>
+      </header>
+      <div className="hero-copy">
+        <p className="eyebrow">Custom western goods · Phoenix, Arizona</p>
+        <h1>RANGE<br/><em>/ MADE</em></h1>
+        <p className="hero-sub"><em>Wear</em> something<br/>worth remembering.</p>
+      </div>
+      <div className="hero-bottom"><span>01 / Bespoke hats</span><a href="#story">Discover the atelier <b>↓</b></a><span>Made one at a time</span></div>
+    </section>
+
+    <section className="manifesto" id="story">
+      <p className="section-index">01 — The idea</p>
+      <h2>Your story,<br/><em>shaped by hand.</em></h2>
+      <p className="manifesto-copy">We make custom hats and clothing for people who would rather keep one good thing than collect a hundred forgettable ones. Every piece begins with a conversation and ends with something unmistakably yours.</p>
+    </section>
+
+    <section className="hat-lab" id="atelier">
+      <div className="lab-intro">
+        <p className="section-index">02 — Shape yours</p>
+        <h2>Meet your<br/><em>future hat.</em></h2>
+        <p>Choose a silhouette, pull the shaper, then make the details yours. This is a starting point—our hatter refines every proportion by hand.</p>
+      </div>
+      <div className="hat-stage" style={{"--felt": felt.value, "--crown": `${crownHeight}%`, "--brim": `${brimWidth}%`} as React.CSSProperties}>
+        <div className="orbit-label"><span>Drag to shape</span><span>Live atelier preview</span></div>
+        <div className="hat" aria-label={`${felt.name} ${selected.name} preview`}><div className="hat-crown"><span>{initials}</span></div><div className="hat-band" data-band={band}/><div className="hat-brim"/></div>
+        <div className="shaper"><span>Soft</span><input aria-label="Adjust hat shape" type="range" min="0" max="100" value={shape} onChange={(event) => setShape(Number(event.target.value))}/><span>Sharp</span></div>
+      </div>
+      <div className="lab-controls">
+        <div className="slide-title"><span>0{slide + 1}</span><div><h3>{selected.name}</h3><p>{selected.note}</p></div><strong>${selected.price}</strong></div>
+        <div className="slide-nav" aria-label="Hat styles">{hatShapes.map((hat, index) => <button key={hat.name} onClick={() => setSlide(index)} className={slide === index ? "active" : ""} aria-label={`Show ${hat.name}`}><span/></button>)}</div>
+        <fieldset><legend>Felt color <span>{felt.name}</span></legend><div className="felt-options">{feltColors.map((color) => <button key={color.name} aria-label={color.name} aria-pressed={felt.name === color.name} style={{background:color.value}} onClick={() => setFelt(color)}/>)}</div></fieldset>
+        <fieldset><legend>Hat band <span>{band}</span></legend><div className="segmented">{["Leather", "Grosgrain", "Braided"].map((option) => <button key={option} className={band === option ? "active" : ""} onClick={() => setBand(option)}>{option}</button>)}</div></fieldset>
+        <fieldset><legend>Branding <span>Up to 3 characters</span></legend><input className="initials" aria-label="Initials for hat" maxLength={3} value={initials} onChange={(event) => setInitials(event.target.value.toUpperCase())}/></fieldset>
+        <button className="request" onClick={() => setRequested(true)}>{requested ? "Your fitting request is ready" : "Request a fitting"}<span>↗</span></button>
+        <small>Final price depends on felt, finish, and custom details. No payment today.</small>
       </div>
     </section>
-    <section className="steps" id="process"><p className="kicker">Simple by design</p><h2>From loose idea<br/>to favorite thing.</h2><div className="step-grid"><article><b>01</b><h3>Build it</h3><p>Pick a base, color, placement, and quantity. Your estimate updates along the way.</p></article><article><b>02</b><h3>Refine it</h3><p>A real person checks every detail and sends a production-ready proof.</p></article><article><b>03</b><h3>Get the goods</h3><p>We print, pack, and send it your way in about 10–14 business days.</p></article></div></section>
-    <section className="work" id="work"><div><p className="kicker">Recently made</p><h2>Objects with a point of view.</h2></div><div className="work-card card-one"><span>Desert Run Club</span><b>48 hats</b></div><div className="work-card card-two"><span>Good Day Coffee</span><b>120 totes</b></div><div className="work-card card-three"><span>Soft Focus Studio</span><b>36 tees</b></div></section>
-    <footer><a className="brand" href="#top"><span className="brand-mark">P/O</span><span>Patch / Object</span></a><p>Custom pieces for good people.<br/>Phoenix, Arizona.</p><div><a href="mailto:hello@patchandobject.com">hello@patchandobject.com</a><span>© 2026 Patch / Object</span></div></footer>
+
+    <section className="process">
+      <p className="section-index">03 — The process</p>
+      <div className="process-heading"><h2>Made slowly.<br/><em>Worn forever.</em></h2><p>From first sketch to final steam, your piece passes through real hands. No two are shaped exactly alike.</p></div>
+      <div className="process-grid"><article><span>01</span><h3>Tell us the story</h3><p>Share the occasion, the feeling, and the references you keep coming back to.</p></article><article><span>02</span><h3>Find your shape</h3><p>We fit, sketch, and choose materials around your face, wardrobe, and life.</p></article><article><span>03</span><h3>Make it personal</h3><p>Color, band, marks, embroidery, and the small details no one else will have.</p></article><article><span>04</span><h3>Wear it in</h3><p>Your finished piece arrives ready to gather miles, stories, and character.</p></article></div>
+    </section>
+
+    <section className="closing"><p>Not merch.<br/><em>A future heirloom.</em></p><a href="#atelier">Start your commission <span>↗</span></a></section>
+    <footer><a className="wordmark" href="#top">Range / Made</a><p>Bespoke hats & custom clothing<br/>Phoenix, Arizona</p><div><a href="mailto:studio@rangemade.com">studio@rangemade.com</a><span>Instagram &nbsp; Pinterest</span></div><small>© 2026 Range / Made</small></footer>
   </main>;
 }
