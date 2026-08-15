@@ -1,6 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+type ViewerMaterial = { name: string; channels: Record<string, { color?: number[]; factor?: number }> };
+type ViewerApi = { start: () => void; addEventListener: (event: string, callback: () => void) => void; getMaterialList: (callback: (error: unknown, materials: ViewerMaterial[]) => void) => void; setMaterial: (material: ViewerMaterial) => void };
+type SketchfabConstructor = new (version: string, iframe: HTMLIFrameElement) => { init: (uid: string, options: Record<string, unknown>) => void };
+declare global { interface Window { Sketchfab?: SketchfabConstructor } }
 
 const hatShapes = [
   { name: "The High Desert", note: "Tall crown · wide brim", crown: 42, brim: 96, price: 340 },
@@ -17,21 +22,63 @@ const feltColors = [
 
 export default function Showcase() {
   const [slide, setSlide] = useState(0);
-  const [shape, setShape] = useState(58);
   const [felt, setFelt] = useState(feltColors[0]);
-  const [band, setBand] = useState("Leather");
+  const [band, setBand] = useState("Matte");
   const [initials, setInitials] = useState("RM");
   const [requested, setRequested] = useState(false);
+  const [viewerReady, setViewerReady] = useState(false);
+  const viewerFrame = useRef<HTMLIFrameElement>(null);
+  const viewerApi = useRef<ViewerApi | null>(null);
+  const viewerMaterials = useRef<ViewerMaterial[]>([]);
+  const viewerStarted = useRef(false);
 
   useEffect(() => {
     const timer = window.setInterval(() => setSlide((current) => (current + 1) % hatShapes.length), 6500);
     return () => window.clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    if (viewerStarted.current || !viewerFrame.current) return;
+    viewerStarted.current = true;
+    const initialize = () => {
+      if (!window.Sketchfab || !viewerFrame.current) return;
+      const client = new window.Sketchfab("1.12.1", viewerFrame.current);
+      client.init("ebcd0a0e1bb941f69c5f1ca4049e8619", {
+        autostart: 1, autospin: .12, camera: 0, dnt: 1, scrollwheel: 0,
+        success: (api: ViewerApi) => {
+          viewerApi.current = api;
+          api.start();
+          api.addEventListener("viewerready", () => api.getMaterialList((error, materials) => {
+            if (!error) { viewerMaterials.current = materials; setViewerReady(true); }
+          }));
+        },
+        error: () => { viewerStarted.current = false; },
+      });
+    };
+    if (window.Sketchfab) initialize();
+    else {
+      const script = document.createElement("script");
+      script.src = "https://static.sketchfab.com/api/sketchfab-viewer-1.12.1.js";
+      script.async = true;
+      script.onload = initialize;
+      document.head.appendChild(script);
+    }
+  }, []);
+
+  useEffect(() => {
+    const api = viewerApi.current;
+    if (!api || !viewerMaterials.current.length) return;
+    const rgb = felt.name === "Bone" ? [0.64, 0.48, 0.29] : felt.name === "Tobacco" ? [0.32, 0.11, 0.035] : felt.name === "Sage" ? [0.17, 0.2, 0.12] : [0.012, 0.012, 0.014];
+    viewerMaterials.current.forEach((material) => {
+      if (/metal|buckle|stitch/i.test(material.name)) return;
+      if (material.channels.AlbedoPBR) material.channels.AlbedoPBR.color = rgb;
+      if (material.channels.DiffuseColor) material.channels.DiffuseColor.color = rgb;
+      if (material.channels.RoughnessPBR) material.channels.RoughnessPBR.factor = band === "Matte" ? .88 : band === "Satin" ? .5 : .72;
+      api.setMaterial(material);
+    });
+  }, [felt, band, viewerReady]);
+
   const selected = hatShapes[slide];
-  const crownHeight = selected.crown + (shape - 50) * 0.15;
-  const brimWidth = selected.brim + (shape - 50) * 0.18;
-  const feltFilter = felt.name === "Bone" ? "sepia(.72) saturate(.45) brightness(1.7)" : felt.name === "Tobacco" ? "sepia(.8) saturate(1.45) brightness(.95)" : felt.name === "Sage" ? "sepia(.35) saturate(.5) hue-rotate(42deg) brightness(1.05)" : "none";
 
   return <main>
     <section className="hero" id="top">
@@ -62,16 +109,18 @@ export default function Showcase() {
         <h2>Meet your<br/><em>future hat.</em></h2>
         <p>Choose a silhouette, pull the shaper, then make the details yours. This is a starting point—our hatter refines every proportion by hand.</p>
       </div>
-      <div className="hat-stage" style={{"--felt": felt.value, "--crown": `${crownHeight}%`, "--brim": `${brimWidth}%`} as React.CSSProperties}>
-        <div className="orbit-label"><span>Drag to shape</span><span>Live atelier preview</span></div>
-        <div className="hat-render-wrap" aria-label={`${felt.name} ${selected.name} preview`} style={{transform:`scaleX(${.94 + brimWidth / 1500}) scaleY(${.94 + crownHeight / 1500}) rotate(${(shape - 50) * .025}deg)`}}><img className="hat-render" src="./range-made-hat-v2.png" alt="Custom black felt cowboy hat with a silver buckle" style={{filter:feltFilter}}/><span className="hat-monogram">{initials}</span></div>
-        <div className="shaper"><span>Soft</span><input aria-label="Adjust hat shape" type="range" min="0" max="100" value={shape} onChange={(event) => setShape(Number(event.target.value))}/><span>Sharp</span></div>
+      <div className="hat-stage sketchfab-stage">
+        <div className="orbit-label"><span>Drag to rotate · scroll page normally</span><span>Live 3D atelier preview</span></div>
+        <iframe ref={viewerFrame} className="sketchfab-viewer" title={`${felt.name} ${selected.name} interactive 3D preview`} allow="autoplay; fullscreen; xr-spatial-tracking" allowFullScreen />
+        <span className="viewer-monogram">{initials}</span>
+        <div className="shaper viewer-help"><span>Click + drag to rotate</span><span>Pinch to zoom</span></div>
+        <a className="sketchfab-credit" href="https://sketchfab.com/3d-models/cowboy-hat-ebcd0a0e1bb941f69c5f1ca4049e8619" target="_blank" rel="noreferrer">“Cowboy Hat” by PBR3D · Sketchfab ↗</a>
       </div>
       <div className="lab-controls">
         <div className="slide-title"><span>0{slide + 1}</span><div><h3>{selected.name}</h3><p>{selected.note}</p></div><strong>${selected.price}</strong></div>
         <div className="slide-nav" aria-label="Hat styles">{hatShapes.map((hat, index) => <button key={hat.name} onClick={() => setSlide(index)} className={slide === index ? "active" : ""} aria-label={`Show ${hat.name}`}><span/></button>)}</div>
         <fieldset><legend>Felt color <span>{felt.name}</span></legend><div className="felt-options">{feltColors.map((color) => <button key={color.name} aria-label={color.name} aria-pressed={felt.name === color.name} style={{background:color.value}} onClick={() => setFelt(color)}/>)}</div></fieldset>
-        <fieldset><legend>Hat band <span>{band}</span></legend><div className="segmented">{["Leather", "Grosgrain", "Braided"].map((option) => <button key={option} className={band === option ? "active" : ""} onClick={() => setBand(option)}>{option}</button>)}</div></fieldset>
+        <fieldset><legend>Material finish <span>{band}</span></legend><div className="segmented">{["Matte", "Satin", "Weathered"].map((option) => <button key={option} className={band === option ? "active" : ""} onClick={() => setBand(option)}>{option}</button>)}</div></fieldset>
         <fieldset><legend>Branding <span>Up to 3 characters</span></legend><input className="initials" aria-label="Initials for hat" maxLength={3} value={initials} onChange={(event) => setInitials(event.target.value.toUpperCase())}/></fieldset>
         <button className="request" onClick={() => setRequested(true)}>{requested ? "Your fitting request is ready" : "Request a fitting"}<span>↗</span></button>
         <small>Final price depends on felt, finish, and custom details. No payment today.</small>

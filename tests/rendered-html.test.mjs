@@ -14,6 +14,7 @@ test("builds the bespoke hat atelier", async () => {
   assert.match(source, /Shape yours/);
   assert.match(source, /The High Desert/);
   assert.match(source, /Request a fitting/);
+  assert.match(source, /ebcd0a0e1bb941f69c5f1ca4049e8619/);
+  assert.match(source, /getMaterialList/);
   await access(new URL("../dist/range-made-hero.png", import.meta.url));
-  await access(new URL("../dist/range-made-hat-v2.png", import.meta.url));
 });
