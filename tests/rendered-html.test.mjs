@@ -15,13 +15,12 @@ test("builds the bespoke hat atelier", async () => {
   assert.match(source, /Cava Signature/);
   assert.match(source, /Request a fitting/);
   assert.match(source, /cava-cowboy-hat\.glb/);
-  assert.match(source, /OrbitControls/);
+  assert.doesNotMatch(source, /OrbitControls|Reposition branding|worldToLocal/);
   assert.match(source, /planeGeometry/);
   assert.match(source, /uFeltColor/);
   assert.match(source, /Custom branding text/);
   assert.match(source, /ACESFilmicToneMapping/);
-  assert.match(source, /worldToLocal/);
-  assert.match(source, /position: \[0, -5\.6, 3\.72\]/);
+  assert.match(source, /Front view · live customization/);
   assert.doesNotMatch(source, /Sketchfab/);
   assert.doesNotMatch(source, /viewer-monogram|sketchfab-credit/);
   await access(new URL("../dist/range-made-hero.png", import.meta.url));
