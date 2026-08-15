@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas, ThreeEvent } from "@react-three/fiber";
-import { Bounds, Center, Decal, Environment, OrbitControls, useGLTF } from "@react-three/drei";
+import { Bounds, Center, Environment, OrbitControls, useGLTF } from "@react-three/drei";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
@@ -37,20 +37,27 @@ function HatModel({ felt, finish, bandColor, markLabel, mark, placing, onPlace }
       if (!(child instanceof THREE.Mesh)) return;
       if (!primaryMesh.current) primaryMesh.current = child;
       const material = (child.material as THREE.MeshStandardMaterial).clone();
-      material.color.set(felt); material.roughness = finish === "Matte" ? .96 : finish === "Satin" ? .48 : .78; material.metalness = .02;
+      material.map = null; material.color.set(felt); material.roughness = finish === "Matte" ? .96 : finish === "Satin" ? .48 : .78; material.metalness = .02;
       child.material = material; child.castShadow = true; child.receiveShadow = true;
     });
   }, [model, felt, finish]);
   const handleClick = (event: ThreeEvent<MouseEvent>) => {
     if (!placing || !event.face) return; event.stopPropagation();
-    const normal = event.face.normal.clone().transformDirection(event.object.matrixWorld);
-    const helper = new THREE.Object3D(); helper.position.copy(event.point); helper.lookAt(event.point.clone().add(normal));
-    onPlace({ position: event.point.toArray() as [number, number, number], rotation: [helper.rotation.x, helper.rotation.y, helper.rotation.z] });
+    const mesh = event.object as THREE.Mesh;
+    const localPoint = mesh.worldToLocal(event.point.clone());
+    const localNormal = event.face.normal.clone().normalize();
+    const helper = new THREE.Object3D(); helper.position.copy(localPoint); helper.lookAt(localPoint.clone().add(localNormal));
+    onPlace({ position: localPoint.toArray() as [number, number, number], rotation: [helper.rotation.x, helper.rotation.y, helper.rotation.z] });
   };
   return <Center><group>
     <primitive object={model} onClick={handleClick}/>
-    <mesh position={[0, -1.05, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[1.34, .62, 1]} castShadow><torusGeometry args={[1.07, .075, 20, 128]}/><meshStandardMaterial color={bandColor} roughness={.74} metalness={.03}/></mesh>
-    {mark && primaryMesh.current && <Decal mesh={primaryMesh} position={mark.position} rotation={mark.rotation} scale={[.8, .3, .3]} map={markTexture} depthTest polygonOffset polygonOffsetFactor={-4}/>} 
+    <group rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh position={[0, -3.45, 3.02]} scale={[1.15, .7, 1]} castShadow><torusGeometry args={[.82, .075, 24, 128]}/><meshStandardMaterial color={bandColor} roughness={.74} metalness={.03}/></mesh>
+      {mark && <mesh position={mark.position} rotation={mark.rotation} renderOrder={8}>
+        <planeGeometry args={[1.18, .44]}/>
+        <meshStandardMaterial map={markTexture} transparent alphaTest={.08} depthWrite={false} roughness={.86} polygonOffset polygonOffsetFactor={-8}/>
+      </mesh>}
+    </group>
   </group></Center>;
 }
 
@@ -65,7 +72,7 @@ function HatViewer(props: React.ComponentProps<typeof HatModel>) {
 export default function Showcase() {
   const [felt, setFelt] = useState(feltColors[0]); const [finish, setFinish] = useState("Matte"); const [initials, setInitials] = useState("CH");
   const [engraving, setEngraving] = useState("Monogram"); const [bandColor, setBandColor] = useState("Espresso"); const [placing, setPlacing] = useState(false);
-  const [mark, setMark] = useState<Mark | null>(null); const [requested, setRequested] = useState(false);
+  const [mark, setMark] = useState<Mark | null>({ position: [0, -5.6, 3.72], rotation: [Math.PI / 2, 0, 0] }); const [requested, setRequested] = useState(false);
   const markLabel = engraving === "Monogram" ? initials : engraving === "Cava Mark" ? "CAVA" : engraving === "Desert Stars" ? "✦ ✦ ✦" : "❦";
   return <main>
     <section className="hero" id="top"><div className="hero-image" aria-hidden="true"/><div className="grain" aria-hidden="true"/><header><button className="menu" aria-label="Open menu"><span>Menu</span><i/><i/></button><a className="wordmark" href="#top">Cava Hat Bar</a><a className="commission" href="#atelier"><em>Start your</em> commission <span>↗</span></a></header><div className="hero-copy"><p className="eyebrow">Custom hat experience · México / United States</p><h1>CAVA<br/><em>HAT BAR</em></h1><p className="hero-sub"><em>Wear</em> something<br/>worth remembering.</p></div><div className="hero-bottom"><span>01 / Custom hat experience</span><a href="#story">Discover Cava <b>↓</b></a><span>Weddings · Events · Pop-ups</span></div></section>

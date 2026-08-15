@@ -16,7 +16,10 @@ test("builds the bespoke hat atelier", async () => {
   assert.match(source, /Request a fitting/);
   assert.match(source, /cava-cowboy-hat\.glb/);
   assert.match(source, /OrbitControls/);
-  assert.match(source, /<Decal/);
+  assert.match(source, /planeGeometry/);
+  assert.match(source, /material\.map = null/);
+  assert.match(source, /worldToLocal/);
+  assert.match(source, /position: \[0, -5\.6, 3\.72\]/);
   assert.doesNotMatch(source, /Sketchfab/);
   assert.doesNotMatch(source, /viewer-monogram|sketchfab-credit/);
   await access(new URL("../dist/range-made-hero.png", import.meta.url));
