@@ -14,9 +14,11 @@ test("builds the bespoke hat atelier", async () => {
   assert.match(source, /Shape yours/);
   assert.match(source, /Cava Signature/);
   assert.match(source, /Request a fitting/);
-  assert.match(source, /ebcd0a0e1bb941f69c5f1ca4049e8619/);
-  assert.match(source, /getMaterialList/);
-  assert.match(source, /createDecal/);
+  assert.match(source, /cava-cowboy-hat\.glb/);
+  assert.match(source, /OrbitControls/);
+  assert.match(source, /<Decal/);
+  assert.doesNotMatch(source, /Sketchfab/);
   assert.doesNotMatch(source, /viewer-monogram|sketchfab-credit/);
   await access(new URL("../dist/range-made-hero.png", import.meta.url));
+  await access(new URL("../dist/cava-cowboy-hat.glb", import.meta.url));
 });
