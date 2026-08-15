@@ -8,13 +8,14 @@ test("builds the bespoke hat atelier", async () => {
     readFile(new URL("../app/showcase.tsx", import.meta.url), "utf8"),
   ]);
 
-  assert.match(html, /<title>Range \/ Made/);
+  assert.match(html, /<title>Cava Hat Bar/);
   assert.match(html, /assets\/index-/);
   assert.match(source, /Wear/);
   assert.match(source, /Shape yours/);
-  assert.match(source, /The High Desert/);
+  assert.match(source, /Cava Signature/);
   assert.match(source, /Request a fitting/);
   assert.match(source, /ebcd0a0e1bb941f69c5f1ca4049e8619/);
   assert.match(source, /getMaterialList/);
+  assert.match(source, /createDecal/);
   await access(new URL("../dist/range-made-hero.png", import.meta.url));
 });

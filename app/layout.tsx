@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Range / Made — Bespoke Hats & Custom Clothing",
-  description: "Shape a one-of-one western hat and commission custom clothing, made by hand in Phoenix, Arizona.",
+  title: "Cava Hat Bar — Custom Hat Experience",
+  description: "Elevated custom western hats for weddings, private events, and pop-ups across México and the United States.",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
