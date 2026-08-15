@@ -17,5 +17,6 @@ test("builds the bespoke hat atelier", async () => {
   assert.match(source, /ebcd0a0e1bb941f69c5f1ca4049e8619/);
   assert.match(source, /getMaterialList/);
   assert.match(source, /createDecal/);
+  assert.doesNotMatch(source, /viewer-monogram|sketchfab-credit/);
   await access(new URL("../dist/range-made-hero.png", import.meta.url));
 });
