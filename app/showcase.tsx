@@ -10,6 +10,8 @@ const feltColors = [
   { name: "Sage", value: "#69705d" }, { name: "Black", value: "#171513" },
 ] as const;
 const bandColors: Record<string, string> = { Espresso: "#29150d", Cognac: "#8a4321", Bone: "#c4a579", Black: "#11100f" };
+const assetBase = import.meta.env.BASE_URL;
+const hatModelUrl = `${assetBase}cava-cowboy-hat.glb`;
 type Mark = { position: [number, number, number]; rotation: [number, number, number] };
 
 function makeMarkTexture(label: string) {
@@ -25,7 +27,7 @@ function makeMarkTexture(label: string) {
 function HatModel({ felt, finish, bandColor, markLabel, mark, placing, onPlace }: {
   felt: string; finish: string; bandColor: string; markLabel: string; mark: Mark | null; placing: boolean; onPlace: (mark: Mark) => void;
 }) {
-  const { scene } = useGLTF("/cava-cowboy-hat.glb");
+  const { scene } = useGLTF(hatModelUrl);
   const model = useMemo(() => scene.clone(true), [scene]);
   const primaryMesh = useRef<THREE.Mesh | null>(null);
   const markTexture = useMemo(() => makeMarkTexture(markLabel), [markLabel]);
@@ -82,4 +84,4 @@ export default function Showcase() {
   </main>;
 }
 
-useGLTF.preload("/cava-cowboy-hat.glb");
+useGLTF.preload(hatModelUrl);
